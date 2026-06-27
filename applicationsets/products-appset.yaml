@@ -28,20 +28,12 @@ spec:
         argocd.argoproj.io/sync-wave: "0"
     spec:
       project: default
-      sources:
-        # Source 1: Helm chart lives inside the product's own repo (chart/ directory)
-        - repoURL: "{{ .productRepoURL }}"
-          targetRevision: main
-          path: chart
-          helm:
-            releaseName: "{{ .product }}"
-            valueFiles:
-              # Env-specific values pulled from the same repo via $values alias
-              - $values/{{ .env }}/values.yaml
-        # Source 2: same repo referenced as $values to serve env values files
-        - repoURL: "{{ .productRepoURL }}"
-          targetRevision: main
-          ref: values
+      source:
+        repoURL: "{{ .productRepoURL }}"
+        targetRevision: main
+        # ArgoCD kustomization.yaml'ı görünce otomatik Kustomize kullanır.
+        # Overlay: base chart/values.yaml + sadece env-spesifik overrides.
+        path: "overlays/{{ .env }}"
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{ .product }}-{{ .env }}"
