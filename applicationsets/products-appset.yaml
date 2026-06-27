@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: products
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - matrix:
+        generators:
+          # Axis 1: product registry — platform team adds one entry per product onboarding
+          - list:
+              elements:
+                - product: product-helloapi
+                  productRepoURL: https://github.com/miraccan00/product-helloapi-gitops.git
+                # - product: product-b
+                #   productRepoURL: https://github.com/miraccan00/product-b-gitops.git
+          # Axis 2: environments — applies every product to every env automatically
+          - list:
+              elements:
+                - env: dev
+                - env: prod
+  template:
+    metadata:
+      # e.g. "product-helloapi-dev", "product-b-prod"
+      name: "{{ .product }}-{{ .env }}"
+      annotations:
+        argocd.argoproj.io/sync-wave: "0"
+    spec:
+      project: default
+      sources:
+        # Source 1: Helm chart lives inside the product's own repo (chart/ directory)
+        - repoURL: "{{ .productRepoURL }}"
+          targetRevision: main
+          path: chart
+          helm:
+            releaseName: "{{ .product }}"
+            valueFiles:
+              # Env-specific values pulled from the same repo via $values alias
+              - $values/{{ .env }}/values.yaml
+        # Source 2: same repo referenced as $values to serve env values files
+        - repoURL: "{{ .productRepoURL }}"
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .product }}-{{ .env }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=false  # namespace is managed by namespaces-appset (wave -1)

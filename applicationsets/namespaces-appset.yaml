@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: namespaces
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: https://github.com/miraccan00/platform-gitops.git
+        revision: main
+        # Auto-discovers: namespaces/product-helloapi/dev, namespaces/product-helloapi/prod, etc.
+        directories:
+          - path: namespaces/*/*
+  template:
+    metadata:
+      # e.g. "ns-product-helloapi-dev", "ns-product-b-prod"
+      name: "ns-{{ index .path.segments 1 }}-{{ index .path.segments 2 }}"
+      annotations:
+        # Wave -1: namespaces and quotas must exist before apps (wave 0) start
+        argocd.argoproj.io/sync-wave: "-1"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/miraccan00/platform-gitops.git
+        targetRevision: main
+        path: "{{ .path.path }}"
+      destination:
+        server: https://kubernetes.default.svc
+        # Namespace = product-helloapi-dev, product-b-prod, etc.
+        namespace: "{{ index .path.segments 1 }}-{{ index .path.segments 2 }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
