@@ -4,22 +4,4 @@ namespace: product-helloapi-prod
 resources:
   - ../base
 patches:
-  - target:
-      kind: ResourceQuota
-      name: quota
-    patch: |
-      - op: replace
-        path: /spec/hard/requests.cpu
-        value: "4"
-      - op: replace
-        path: /spec/hard/requests.memory
-        value: 4Gi
-      - op: replace
-        path: /spec/hard/limits.cpu
-        value: "8"
-      - op: replace
-        path: /spec/hard/limits.memory
-        value: 8Gi
-      - op: replace
-        path: /spec/hard/pods
-        value: "50"
+  - path: quota-patch.yaml

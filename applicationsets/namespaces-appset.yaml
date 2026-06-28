@@ -12,6 +12,8 @@ spec:
         # Auto-discovers: namespaces/product-helloapi/dev, namespaces/product-helloapi/prod, etc.
         directories:
           - path: namespaces/*/*
+          - path: namespaces/*/base
+            exclude: true
   template:
     metadata:
       # e.g. "ns-product-helloapi-dev", "ns-product-b-prod"
