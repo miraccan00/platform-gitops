@@ -1,0 +1,59 @@
+# argocd/values-ha.yaml — argo/argo-cd chart 10.9.2 (Argo CD v3.5.3)
+# Used twice: once by `helm install` on day 0, then by the argocd Application
+# (apps/argocd.yaml), so Argo CD manages its own install from this same file.
+#
+# What HA means per component:
+#   redis-ha        3 Redis + 3 Sentinel + 3 HAProxy. The one piece that really fails over.
+#   repoServer      stateless, renders manifests. 2+ replicas; this is what runs out of memory.
+#   server          stateless API/UI. 2+ replicas.
+#   applicationSet  2 replicas with leader election: one works, one waits.
+#   controller      NOT active-active. Replicas > 1 means sharding by cluster; with one
+#                   destination cluster a second replica only waits. Kept at 1 on purpose.
+
+redis-ha:
+  enabled: true          # the chart's warning: needs 3 nodes (hard anti-affinity)
+
+controller:
+  replicas: 1            # no PDB: with one replica, minAvailable 1 would block every node drain
+
+server:
+  replicas: 2
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+repoServer:
+  replicas: 2
+  pdb:
+    enabled: true
+    minAvailable: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi        # a mass sync renders many charts at once; this is the component that OOMs
+
+applicationSet:
+  replicas: 2
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+dex:
+  enabled: false         # SSO comes in the next post (OIDC); local admin for now
+
+notifications:
+  enabled: false
+
+configs:
+  params:
+    server.insecure: "true"   # the lab reaches the UI through port-forward; TLS belongs on the gateway
+    # Concurrent manifest generations per repo-server replica. 0 (default) = unlimited,
+    # so a mass sync renders everything at once and memory spikes past the limit.
+    reposerver.parallelism.limit: 5
+  cm:
+    # product-*-gitops overlays wrap the chart with kustomize `helmCharts:`.
+    # Without this flag the repo-server refuses to render them:
+    #   "must specify --enable-helm"
+    kustomize.buildOptions: --enable-helm

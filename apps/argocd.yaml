@@ -1,0 +1,37 @@
+# apps/argocd.yaml — Argo CD manages its own install.
+# Same chart version and the same values file used by `helm install` on day 0.
+# Upgrading Argo CD from now on = bump targetRevision below in a PR.
+# Do not run `helm upgrade` again after this; Argo CD owns the objects and the
+# Helm release secret stays behind as a stale record.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: platform
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 10.9.2
+      helm:
+        releaseName: argocd          # must match `helm install argocd ...`, or every object name changes
+        valueFiles:
+          - $values/argocd/values-ha.yaml
+    - repoURL: https://github.com/miraccan00/platform-gitops.git
+      targetRevision: blog-04
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      # prune false, on purpose: a bad commit that drops a ConfigMap or the redis
+      # StatefulSet from the render would make Argo CD delete the parts it runs on,
+      # and it could not sync itself back. selfHeal still reverts drift.
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

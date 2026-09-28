@@ -1,0 +1,21 @@
+# apps/applicationsets.yaml — the ApplicationSets in applicationsets/ as one Application.
+# root -> this Application -> the two ApplicationSets -> one Application per
+# namespace (namespaces-appset) and per product x env (products-appset).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: applicationsets
+  namespace: argocd
+spec:
+  project: platform
+  source:
+    repoURL: https://github.com/miraccan00/platform-gitops.git
+    targetRevision: blog-04
+    path: applicationsets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

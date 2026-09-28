@@ -8,7 +8,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/miraccan00/platform-gitops.git
-        revision: main
+        revision: blog-04
         # Auto-discovers: namespaces/product-helloapi/dev, namespaces/product-helloapi/prod, etc.
         directories:
           - path: namespaces/*/*
@@ -22,10 +22,10 @@ spec:
         # Wave -1: namespaces and quotas must exist before apps (wave 0) start
         argocd.argoproj.io/sync-wave: "-1"
     spec:
-      project: default
+      project: platform
       source:
         repoURL: https://github.com/miraccan00/platform-gitops.git
-        targetRevision: main
+        targetRevision: blog-04
         path: "{{ .path.path }}"
       destination:
         server: https://kubernetes.default.svc

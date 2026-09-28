@@ -1,0 +1,25 @@
+# bootstrap/root.yaml — the only Application applied by hand:
+#   kubectl apply -f bootstrap/root.yaml
+# It points at apps/, and everything in apps/ is itself an Application or an
+# AppProject (app-of-apps). From here on, adding a component = adding a file
+# under apps/ and merging the PR.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/miraccan00/platform-gitops.git
+    targetRevision: blog-04
+    path: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      # prune: a file deleted from apps/ removes that Application from the cluster.
+      # Without it a deleted app keeps running and root shows OutOfSync forever.
+      prune: true
+      selfHeal: true

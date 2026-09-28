@@ -27,10 +27,10 @@ spec:
       annotations:
         argocd.argoproj.io/sync-wave: "0"
     spec:
-      project: default
+      project: products
       source:
         repoURL: "{{ .productRepoURL }}"
-        targetRevision: main
+        targetRevision: blog-04
         # ArgoCD kustomization.yaml'ı görünce otomatik Kustomize kullanır.
         # Overlay: base chart/values.yaml + sadece env-spesifik overrides.
         path: "overlays/{{ .env }}"

@@ -1,0 +1,37 @@
+# apps/projects.yaml
+# Sync wave -2: projects must exist before the Applications that reference them.
+# Waves order resources inside ONE sync (here: root's sync of apps/).
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  description: Argo CD itself, namespaces and quotas, the ApplicationSets
+  sourceRepos:
+    - https://github.com/miraccan00/platform-gitops.git
+    - https://argoproj.github.io/argo-helm
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: products
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  description: Product teams. Their own repos, their own product-* namespaces, nothing cluster-scoped.
+  sourceRepos:
+    - https://github.com/miraccan00/product-*-gitops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: product-*
+  clusterResourceWhitelist: []
