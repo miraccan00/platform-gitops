@@ -70,6 +70,9 @@ configs:
       issuer: http://zitadel.127.0.0.1.nip.io:8081
       clientID: $argocd-oidc-zitadel:clientID
       clientSecret: $argocd-oidc-zitadel:clientSecret
+      # The argocd CLI can't keep a secret: it logs in with PKCE through a second, public ZITADEL app.
+      # With the UI app's ID, ZITADEL answers 'invalid_client "empty client secret"'.
+      cliClientID: $argocd-oidc-zitadel:cliClientID
       requestedScopes:
         - openid
         - profile
