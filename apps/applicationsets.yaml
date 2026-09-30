@@ -10,7 +10,7 @@ spec:
   project: platform
   source:
     repoURL: https://github.com/miraccan00/platform-gitops.git
-    targetRevision: blog-04
+    targetRevision: blog-05
     path: applicationsets
   destination:
     server: https://kubernetes.default.svc

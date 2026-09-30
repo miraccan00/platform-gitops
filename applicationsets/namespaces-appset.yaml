@@ -8,7 +8,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/miraccan00/platform-gitops.git
-        revision: blog-04
+        revision: blog-05
         # Auto-discovers: namespaces/product-helloapi/dev, namespaces/product-helloapi/prod, etc.
         directories:
           - path: namespaces/*/*
@@ -25,7 +25,7 @@ spec:
       project: platform
       source:
         repoURL: https://github.com/miraccan00/platform-gitops.git
-        targetRevision: blog-04
+        targetRevision: blog-05
         path: "{{ .path.path }}"
       destination:
         server: https://kubernetes.default.svc

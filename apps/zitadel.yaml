@@ -1,0 +1,37 @@
+# apps/zitadel.yaml — ZITADEL from its Helm chart, values from this repo.
+# root's sync waves create this Application after zitadel-db, but they don't wait for Postgres to
+# be ready (Application resources have no health check by default). The retry covers that gap:
+# the PreSync init job fails until Postgres answers, Argo CD retries the sync.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zitadel
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: platform
+  sources:
+    - repoURL: https://charts.zitadel.com
+      chart: zitadel
+      targetRevision: 10.1.0
+      helm:
+        releaseName: zitadel
+        valueFiles:
+          - $values/zitadel/values.yaml
+    - repoURL: https://github.com/miraccan00/platform-gitops.git
+      targetRevision: blog-05
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zitadel
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

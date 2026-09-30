@@ -1,0 +1,25 @@
+# apps/zitadel-db.yaml — namespace, Secrets and Postgres for ZITADEL.
+# A separate Application on purpose: the chart's init and setup jobs are Helm pre-install hooks,
+# which Argo CD runs as PreSync, before any other resource of the same Application. If Postgres
+# and the Secrets lived in apps/zitadel.yaml, the hooks would start against a database that
+# doesn't exist yet.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zitadel-db
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: platform
+  source:
+    repoURL: https://github.com/miraccan00/platform-gitops.git
+    targetRevision: blog-05
+    path: zitadel/db
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zitadel
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -30,7 +30,7 @@ spec:
       project: products
       source:
         repoURL: "{{ .productRepoURL }}"
-        targetRevision: blog-04
+        targetRevision: blog-04   # the product repo's branch; unchanged in 05
         # ArgoCD kustomization.yaml'ı görünce otomatik Kustomize kullanır.
         # Overlay: base chart/values.yaml + sadece env-spesifik overrides.
         path: "overlays/{{ .env }}"

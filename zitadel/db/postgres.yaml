@@ -1,0 +1,59 @@
+# zitadel/db/postgres.yaml — a single Postgres for ZITADEL. Enough for a lab; production runs an operator
+# (CloudNativePG) with backups. ZITADEL needs PostgreSQL 14+.
+apiVersion: v1
+kind: Service
+metadata:
+  name: zitadel-postgres
+  namespace: zitadel
+spec:
+  selector:
+    app: zitadel-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zitadel-postgres
+  namespace: zitadel
+spec:
+  serviceName: zitadel-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zitadel-postgres
+  template:
+    metadata:
+      labels:
+        app: zitadel-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          envFrom:
+            - secretRef:
+                name: zitadel-postgres
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: [pg_isready, -U, zitadel]
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 2Gi

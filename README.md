@@ -93,9 +93,10 @@ then remove `namespaces/<product>/`.
 
 ## Branch note
 
-`blog-04` pins every `targetRevision` / `revision` to `blog-04` so the lab reads this branch. Before
-merging to `main`:
+Each article pins this repo to its own branch: `blog-04` (Argo CD HA, app-of-apps), `blog-05` (+ ZITADEL
+SSO: `apps/zitadel-db.yaml`, `apps/zitadel.yaml`, `zitadel/`, OIDC and RBAC in `argocd/values-ha.yaml`).
+Branches are never deleted; the articles and their labs read them. `products-appset.yaml` keeps
+`blog-04` for `product-helloapi-gitops`, which did not change in 05.
 
-```bash
-grep -rl 'blog-04' apps bootstrap applicationsets | xargs sed -i '' 's/blog-04/main/'
-```
+`zitadel/db/secrets.yaml` holds base64 Secrets **on purpose** (the starting point of the next article,
+which moves them into Vault and rotates them). Lab values only.

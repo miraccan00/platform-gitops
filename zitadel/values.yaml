@@ -1,0 +1,44 @@
+# zitadel/values.yaml — chart zitadel/zitadel 10.1.0 (ZITADEL v4.19). Read by apps/zitadel.yaml.
+zitadel:
+  # Both Secrets live in zitadel/db (applied first by the zitadel-db Application).
+  masterkeySecretName: zitadel-masterkey
+  configmapConfig:
+    # One name for the browser and for pods. The browser resolves nip.io to 127.0.0.1 and reaches
+    # ZITADEL through `make zitadel-ui` (port-forward 8081). Pods resolve the same name through a
+    # CoreDNS rewrite to the zitadel Service (`make dns`). The issuer in every token is this URL,
+    # so it has to be identical on both sides. `*.localhost` does not work: resolvers answer it
+    # with ::1 without asking DNS (RFC 6761).
+    ExternalDomain: zitadel.127.0.0.1.nip.io
+    ExternalPort: 8081
+    ExternalSecure: false          # lab: plain HTTP behind a port-forward; production terminates TLS
+    TLS:
+      Enabled: false
+    DefaultInstance:
+      Features:
+        # v4 sends new instances to Login v2, a separate app (zitadel-login, port 3000) that needs
+        # path routing on the same host. Without an ingress we use the built-in login instead.
+        LoginV2:
+          Required: false
+    FirstInstance:
+      Org:
+        Human:
+          UserName: zitadel-admin
+          Password: Password1!       # lab only; the console admin
+          PasswordChangeRequired: false
+        # A machine user with a PAT; the setup job writes it to the Secret zitadel/iam-admin-pat.
+        # scripts/zitadel-setup.sh uses it to create the project, the app and the users.
+        Machine:
+          Machine:
+            Username: iam-admin
+            Name: IAM admin for setup scripts
+          Pat:
+            ExpirationDate: '2029-01-01T00:00:00Z'
+envVarsSecret: zitadel-db          # ZITADEL_DATABASE_POSTGRES_DSN
+login:
+  enabled: false
+service:
+  port: 8081                       # same port inside and outside, so the issuer URL matches
+replicaCount: 1
+resources:
+  requests: {cpu: 100m, memory: 256Mi}
+  limits: {memory: 512Mi}
