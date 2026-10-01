@@ -85,6 +85,16 @@ configs:
     # urn:zitadel:iam:org:project:roles). The local admin stays as the break-glass account.
     policy.default: ""
     scopes: "[groups]"
+    # role:developer is the product team's role: it sees, syncs and reads logs of the
+    # Applications in the "products" project and nothing in "platform" (Argo CD, ZITADEL).
+    # The project's sourceRepos/destinations already stop it from pointing an app elsewhere;
+    # without create/update/delete it can't change the app either, only run what Git says.
     policy.csv: |
-      g, platform-admins, role:admin
-      g, platform-viewers, role:readonly
+      p, role:developer, applications, get,      products/*, allow
+      p, role:developer, applications, sync,     products/*, allow
+      p, role:developer, applications, action/*, products/*, allow
+      p, role:developer, logs,         get,      products/*, allow
+      p, role:developer, projects,     get,      products,   allow
+      g, platform-admins,    role:admin
+      g, product-developers, role:developer
+      g, platform-viewers,   role:readonly
