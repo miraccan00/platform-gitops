@@ -94,7 +94,8 @@ then remove `namespaces/<product>/`.
 ## Branch note
 
 Each article pins this repo to its own branch: `blog-04` (Argo CD HA, app-of-apps), `blog-05` (+ ZITADEL
-SSO: `apps/zitadel-db.yaml`, `apps/zitadel.yaml`, `zitadel/`, OIDC and RBAC in `argocd/values-ha.yaml`).
+SSO: `apps/zitadel-db.yaml`, `apps/zitadel.yaml`, `zitadel/`, OIDC and RBAC in `argocd/values-ha.yaml`), `blog-05b` (+ Vault and ESO: `apps/vault.yaml`,
+`apps/external-secrets*.yaml`, `vault/`, `external-secrets/`, shadow ExternalSecrets in `zitadel/db/`).
 Branches are never deleted; the articles and their labs read them. `products-appset.yaml` keeps
 `blog-04` for `product-helloapi-gitops`, which did not change in 05.
 

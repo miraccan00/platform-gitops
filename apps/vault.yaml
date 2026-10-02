@@ -1,0 +1,32 @@
+# apps/vault.yaml — Vault from its Helm chart, values from this repo.
+# Argo CD installs Vault; it does not init or unseal it. A sealed Vault shows Progressing
+# (vault-0 0/1 Ready) until a human runs `make vault-init` in the lab.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: platform
+  sources:
+    - repoURL: https://helm.releases.hashicorp.com
+      chart: vault
+      targetRevision: 0.34.1
+      helm:
+        releaseName: vault
+        valueFiles:
+          - $values/vault/values.yaml
+    - repoURL: https://github.com/miraccan00/platform-gitops.git
+      targetRevision: blog-05b
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vault
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

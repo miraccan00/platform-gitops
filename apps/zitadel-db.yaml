@@ -14,7 +14,7 @@ spec:
   project: platform
   source:
     repoURL: https://github.com/miraccan00/platform-gitops.git
-    targetRevision: blog-05
+    targetRevision: blog-05b
     path: zitadel/db
   destination:
     server: https://kubernetes.default.svc
@@ -23,3 +23,8 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    # From blog-05b it also holds ExternalSecrets; their CRD comes from the external-secrets
+    # Application. Retry until it exists.
+    retry:
+      limit: 10
+      backoff: {duration: 10s, factor: 2, maxDuration: 3m}

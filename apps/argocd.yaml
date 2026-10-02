@@ -21,7 +21,7 @@ spec:
         valueFiles:
           - $values/argocd/values-ha.yaml
     - repoURL: https://github.com/miraccan00/platform-gitops.git
-      targetRevision: blog-05
+      targetRevision: blog-05b
       ref: values
   destination:
     server: https://kubernetes.default.svc

@@ -1,0 +1,10 @@
+# external-secrets/values.yaml — external-secrets/external-secrets chart 2.11.0 (ESO v2.11.0, API external-secrets.io/v1)
+installCRDs: true
+resources:
+  requests: {cpu: 20m, memory: 64Mi}
+webhook:
+  resources:
+    requests: {cpu: 10m, memory: 32Mi}
+certController:
+  resources:
+    requests: {cpu: 10m, memory: 32Mi}

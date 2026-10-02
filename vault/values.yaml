@@ -1,0 +1,36 @@
+# vault/values.yaml — hashicorp/vault chart 0.34.1 (Vault 2.0.4)
+# Lab: one Vault server in the cluster, integrated storage (raft), init and unseal by hand.
+# Production runs Vault outside the cluster on 3 VMs with 5 key shares / threshold 3;
+# a single node here keeps the lab small, the init/unseal steps are the same.
+injector:
+  enabled: false         # secrets reach pods through ESO, not the sidecar injector
+
+server:
+  ha:
+    enabled: true
+    replicas: 1
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+        listener "tcp" {
+          tls_disable     = 1        # lab: port-forward only; production terminates TLS on Vault itself
+          address         = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+        storage "raft" {
+          path = "/vault/data"
+        }
+        service_registration "kubernetes" {}
+  dataStorage:
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+ui:
+  enabled: true
